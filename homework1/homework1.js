@@ -7,14 +7,19 @@ var numVertices  = 36;
 
 var numChecks = 8;
 
-var program;
-
 var c;
 
 var flag = true;
 
 var pointsArray = [];
 var colorsArray = [];
+
+var xAxis = 0;
+var yAxis = 1;
+var zAxis = 2;
+var axis = 0;
+var theta = [0, 0, 0];
+var thetaLoc;
 
 var vertices = [
     vec4( -0.5, -0.5,  0.5, 1.0 ),
@@ -37,8 +42,6 @@ var vertexColors = [
     vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
     vec4( 0.0, 1.0, 1.0, 1.0 )   // cyan
 ];
-
-var thetaLoc;
 
 function quad(a, b, c, d) {
      pointsArray.push(vertices[a]);
@@ -78,6 +81,8 @@ window.onload = function init() {
     gl = canvas.getContext('webgl2');
     if (!gl) alert("WebGL 2.0 isn't available" );
 
+    colorCube();
+
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
 
@@ -86,10 +91,8 @@ window.onload = function init() {
     //
     //  Load shaders and initialize attribute buffers
     //
-    program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
-
-    colorCube();
+    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram(program);
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
@@ -107,11 +110,29 @@ window.onload = function init() {
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
+    thetaLoc = gl.getUniformLocation(program, "uTheta");
+
+    //event listeners for buttons
+    document.getElementById( "xButton" ).onclick = function () {
+        axis = xAxis;
+    };
+    document.getElementById( "yButton" ).onclick = function () {
+        axis = yAxis;
+    };
+    document.getElementById( "zButton" ).onclick = function () {
+        axis = zAxis;
+    };
+
     render();
 }
 
 var render = function() {
+    
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    
+    theta[axis] += 2.0;
+    gl.uniform3fv(thetaLoc, theta);
+    
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
     requestAnimationFrame(render);
 }
