@@ -13,6 +13,7 @@ var flag = true;
 
 var pointsArray = [];
 var colorsArray = [];
+var normalsArray = [];
 
 var xAxis = 0;
 var yAxis = 1;
@@ -20,6 +21,9 @@ var zAxis = 2;
 var axis = 0;
 var theta = [0, 0, 0];
 var thetaLoc;
+
+var modelViewMatrixLoc;
+var modelViewMatrix;
 
 var vertices = [
     vec4( -0.5, -0.5,  0.5, 1.0 ),
@@ -44,22 +48,34 @@ var vertexColors = [
 ];
 
 function quad(a, b, c, d) {
+
+    var t1 = subtract(vertices[b], vertices[a]);
+    var t2 = subtract(vertices[c], vertices[b]);
+    var normal = cross(t1, t2);
+    normal = vec3(normal);
+
      pointsArray.push(vertices[a]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 
      pointsArray.push(vertices[b]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 
      pointsArray.push(vertices[c]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 
      pointsArray.push(vertices[a]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 
      pointsArray.push(vertices[c]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 
      pointsArray.push(vertices[d]);
+     normalsArray.push(normal);
      colorsArray.push(vertexColors[a]);
 }
 
@@ -75,7 +91,6 @@ function colorCube()
 
 
 window.onload = function init() {
-
     canvas = document.getElementById( "gl-canvas" );
 
     gl = canvas.getContext('webgl2');
@@ -110,18 +125,14 @@ window.onload = function init() {
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
-    thetaLoc = gl.getUniformLocation(program, "uTheta");
+    thetaLoc = gl.getUniformLocation(program, "theta");
+
+    modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
 
     //event listeners for buttons
-    document.getElementById( "xButton" ).onclick = function () {
-        axis = xAxis;
-    };
-    document.getElementById( "yButton" ).onclick = function () {
-        axis = yAxis;
-    };
-    document.getElementById( "zButton" ).onclick = function () {
-        axis = zAxis;
-    };
+    document.getElementById("xButton").onclick = function(){axis = xAxis;};
+    document.getElementById("yButton").onclick = function(){axis = yAxis;};
+    document.getElementById("zButton").onclick = function(){axis = zAxis;};
 
     render();
 }
@@ -131,8 +142,17 @@ var render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     
     theta[axis] += 2.0;
-    gl.uniform3fv(thetaLoc, theta);
-    
+
+    modelViewMatrix = mat4();
+    modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
+    modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], vec3(0, 1, 0)));
+    modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], vec3(0, 0, 1)));
+
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
-    requestAnimationFrame(render);
+    
+    // Added delay 
+    setTimeout(function(){ requestAnimationFrame(render); }, 50 );
+    // requestAnimationFrame(render);
 }
