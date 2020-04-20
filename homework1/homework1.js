@@ -11,6 +11,13 @@ var c;
 
 var flag = true;
 
+var near = -1;
+var far = 1;
+var left = -1.0;
+var topp = 1.0;
+var right = 1.0;
+var bottom = -1.0;
+
 var pointsArray = [];
 var colorsArray = [];
 var normalsArray = [];
@@ -22,8 +29,8 @@ var axis = 0;
 var theta = [0, 0, 0];
 var thetaLoc;
 
-var modelViewMatrixLoc;
-var modelViewMatrix;
+var modelViewMatrix, projectionMatrix;
+var modelViewMatrixLoc, projectionMatrixLoc;
 
 var vertices = [
     vec4(-0.75, -0.45, -0.45, 1.0), //0
@@ -226,11 +233,13 @@ window.onload = function init() {
     thetaLoc = gl.getUniformLocation(program, "theta");
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
+    projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
 
     //event listeners for buttons
     document.getElementById("xButton").onclick = function(){axis = xAxis;};
     document.getElementById("yButton").onclick = function(){axis = yAxis;};
     document.getElementById("zButton").onclick = function(){axis = zAxis;};
+    document.getElementById("ButtonT").onclick = function(){flag = !flag;};
 
     render();
 }
@@ -239,14 +248,17 @@ var render = function() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    theta[axis] += 2.0;
+    if(flag) theta[axis] += 2.0;
 
     modelViewMatrix = mat4();
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[xAxis], vec3(1, 0, 0)));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[yAxis], vec3(0, 1, 0)));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[zAxis], vec3(0, 0, 1)));
+   
+    projectionMatrix = ortho(left, right, bottom, topp, near, far);
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv( projectionMatrixLoc, false, flatten(projectionMatrix) );
 
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 
