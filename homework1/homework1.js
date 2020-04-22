@@ -39,8 +39,20 @@ var thetaLoc;
 
 var angle = 0.0;
 
+var ambientColor, diffuseColor, specularColor;
 var modelViewMatrix, projectionMatrix;
 var modelViewMatrixLoc, projectionMatrixLoc;
+
+// Exercise 3
+var lightPosition = vec4(1.0, 1.0, 1.0, 0.0);
+var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
+var lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
+var lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+
+var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
+var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
+var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
+var materialShininess = 100.0;
 
 var vertices = [
     vec4(-0.75, -0.45, -0.45, 1.0), //0
@@ -78,18 +90,18 @@ var vertices = [
     // vec4( 0.5, -0.5, -0.5, 1.0 )
 ];
 
-var vertexColors = [
-    vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
-    vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
-    vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
-    vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
-    vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
-    vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-    vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
-    vec4( 0.0, 1.0, 1.0, 1.0 ),   // cyan
-];
+// var vertexColors = [
+//     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
+//     vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
+//     vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
+//     vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
+//     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
+//     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
+//     vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
+//     vec4( 0.0, 1.0, 1.0, 1.0 ),   // cyan
+// ];
 
-function quad(a, b, c, d, e) {
+function quad(a, b, c, d) {
 
     var t1 = subtract(vertices[b], vertices[a]);
     var t2 = subtract(vertices[c], vertices[b]);
@@ -98,30 +110,30 @@ function quad(a, b, c, d, e) {
 
      pointsArray.push(vertices[a]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[b]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[c]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[a]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[c]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[d]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 }
 
-function tri(a, b, c, e) {
+function tri(a, b, c) {
 
     var t1 = subtract(vertices[b], vertices[a]);
     var t2 = subtract(vertices[c], vertices[b]);
@@ -130,52 +142,52 @@ function tri(a, b, c, e) {
 
      pointsArray.push(vertices[a]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[b]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[c]);
      normalsArray.push(normal);
-     colorsArray.push(vertexColors[e]);
+    //  colorsArray.push(vertexColors[e]);
 }
 
 function colorCube()
 {
     // Sides
-    quad( 0, 1, 3, 2, 0 );
-    quad( 0, 1, 5, 4, 1 );
-    quad( 4, 5, 13, 12, 2 );
-    quad( 12, 13, 21, 20, 3 );
-    quad( 20, 21, 23, 22, 4 );
-    quad( 22, 23, 19, 18, 5 );
-    quad( 18, 19, 11, 10, 6 );
-    quad( 10, 11, 3, 2, 7 );
+    quad( 0, 1, 3, 2);
+    quad( 0, 1, 5, 4);
+    quad( 4, 5, 13, 12);
+    quad( 12, 13, 21, 20);
+    quad( 20, 21, 23, 22);
+    quad( 22, 23, 19, 18);
+    quad( 18, 19, 11, 10);
+    quad( 10, 11, 3, 2);
 
     // Top and Bottom
-    quad( 17, 15, 7, 9, 1 );
-    quad( 16, 8, 6, 14, 0 );
+    quad( 17, 15, 7, 9);
+    quad( 16, 8, 6, 14);
 
     // Side Up
-    quad( 19, 17, 9, 11, 2 );
-    tri( 11, 9, 3, 3 );
-    quad( 3, 9, 7, 1, 4 );
-    tri( 1, 7, 5, 5 );
-    quad( 5, 7, 15, 13, 5 );
-    tri( 13, 15, 21, 6 );
-    quad( 21, 15, 17, 23, 7 );
-    tri( 23, 17, 19, 0 );
+    quad( 19, 17, 9, 11 );
+    tri( 11, 9, 3 );
+    quad( 3, 9, 7, 1 );
+    tri( 1, 7, 5 );
+    quad( 5, 7, 15, 13 );
+    tri( 13, 15, 21 );
+    quad( 21, 15, 17, 23 );
+    tri( 23, 17, 19 );
 
     // Side bottom
-    quad( 16, 18, 10, 8, 1 );
-    tri( 8, 10, 2, 2 );
-    quad( 8, 2, 0, 6, 3 );
-    tri( 6, 0, 4, 4 );
-    quad( 6, 4, 12, 14, 5 );
-    tri( 14, 12, 20, 6 );
-    quad( 14, 20, 22, 16, 7 );
-    tri( 16, 22, 18, 0 );
+    quad( 16, 18, 10, 8 );
+    tri( 8, 10, 2 );
+    quad( 8, 2, 0, 6 );
+    tri( 6, 0, 4 );
+    quad( 6, 4, 12, 14 );
+    tri( 14, 12, 20 );
+    quad( 14, 20, 22, 16 );
+    tri( 16, 22, 18 );
 
     // quad( 1, 0, 3, 2 );
     // quad( 2, 3, 7, 6 );
@@ -205,13 +217,17 @@ window.onload = function init() {
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram(program);
 
-    var cBuffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, cBuffer );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(colorsArray), gl.STATIC_DRAW );
+    var nBuffer = gl.createBuffer();
+    gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer );
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
 
-    var vColor = gl.getAttribLocation( program, "aColor" );
-    gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vColor );
+    var normalLoc = gl.getAttribLocation(program, "aNormal");
+    gl.vertexAttribPointer(normalLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(normalLoc);
+
+    // var vColor = gl.getAttribLocation( program, "aColor" );
+    // gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
+    // gl.enableVertexAttribArray( vColor );
 
     var vBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ARRAY_BUFFER, vBuffer);
@@ -223,8 +239,19 @@ window.onload = function init() {
 
     thetaLoc = gl.getUniformLocation(program, "theta");
 
+    var ambientProduct = mult(lightAmbient, materialAmbient);
+    var diffuseProduct = mult(lightDiffuse, materialDiffuse);
+    var specularProduct = mult(lightSpecular, materialSpecular);
+
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
+
+    gl.uniform4fv(gl.getUniformLocation(program, "uAmbientProduct"), ambientProduct);
+    gl.uniform4fv(gl.getUniformLocation(program, "uDiffuseProduct"), diffuseProduct );
+    gl.uniform4fv(gl.getUniformLocation(program, "uSpecularProduct"), specularProduct );
+    gl.uniform4fv(gl.getUniformLocation(program, "uLightPosition"), lightPosition );
+    
+    gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
 
     //event listeners for buttons
     // document.getElementById("xButton").onclick = function(){axis = xAxis;};
