@@ -1,6 +1,63 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <style>
+    .button {
+        background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;}
+
+        .btngreen {background-color: #4CAF50;}
+        .btnblue {background-color: #008CBA;}
+        .btnred {background-color: #f44336;}
+        .btnblack {background-color: #555555;}
+
+        .slidecontainer {
+        width: 100%;
+        }
+
+        .slider {
+        -webkit-appearance: none;
+        width: 50%;
+        height: 25px;
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+        }
+
+        .slider:hover {
+        opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        background: #4CAF50;
+        cursor: pointer;
+        }
+    </style>
+</head>
+
+ 
 <script id="vertex-shader" type="x-shader/x-vertex">
 #version 300 es
 
@@ -37,7 +94,6 @@ main()
 <script type="text/javascript" src="../Common/initShaders.js"></script>
 <script type="text/javascript" src="../Common/MVnew.js"></script>
 <script type="text/javascript" src="Homework1.js"></script>
-<button id = "ButtonT">Toggle Rotation</button>
 
 <body>
 <canvas id="gl-canvas" width="512" height="512">
@@ -46,9 +102,22 @@ Oops ... your browser doesn't support the HTML5 canvas element
 
 <br/>
 
-<button id= "xButton">Rotate X</button>
-<button id= "yButton">Rotate Y</button>
-<button id= "zButton">Rotate Z</button>
+<p> </p>
+<!-- <div>zNear .01  <input id="zNearSlider"  type="range" min=".01"  max="3"    step="0.1" value="0.3" />3  </div> -->
+<p> Perspective Position </p>
+<div>zNear <br/> 0.01   <input id="zNearSlider"  type="range" min=".01"  max="3"    step="0.1" value="0.3" class="slider" />3   </div>
+<div>fov <br/> 10.0     <input id="fovSlider"   type="range" min="10"   max="120"  step="5"   value="45"  class="slider" />120 </div>
+
+<br/>
+<p> Viewer Position Position </p>
+<div>Theta <br/> -90    <input id="thetaSlider"  type="range" min="-90.0" max="90.0" step="0.1" value="4"   class="slider" />90  </div>
+<div>Phi <br/>   -90    <input id="phiSlider"    type="range" min="-90.0" max="90.0" step="0.1" value="4"   class="slider" />90  </div>
+<div>radius <br/> 0.05  <input id="radiusSlider"  type="range" min="0.05" max="10"   step="0.1" value="4"   class="slider" />10  </div>
+<br/>
+
+<!-- <button id= "xButton">Rotate X</button>
+<button id= "yButton" class="button btnred">Rotate Y</button>
+<button id= "zButton" class="button btnred">Rotate Z</button> -->
 
 </body>
 </html>
