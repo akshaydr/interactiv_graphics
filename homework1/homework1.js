@@ -45,13 +45,23 @@ var modelViewMatrixLoc, projectionMatrixLoc;
 
 // Exercise 3
 var lightPosition = vec4(1.0, 1.0, 1.0, 0.0);
-var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
-var lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
-var lightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+var poslightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
+var poslightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
+var poslightSpecular = vec4(1.0, 1.0, 1.0, 1.0);
+
+// var lightPosition = vec4(0.0, 0.0, 0.0, 0.0);
+// var poslightAmbient = vec4(0.0, 0.0, 0.0, 0.0);
+// var poslightDiffuse = vec4(0.0, 0.0, 0.0, 0.0);
+// var poslightSpecular = vec4(0.0, 0.0, 0.0, 0.0);
+
+var oneDirLightPosition = vec4(1.0, 1.0, 1.0, 0.0 );
+var oneDirlightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
+var oneDirlightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
 var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
 var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
-var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
+var materialSpecular = vec4(1.0, 0.0, 0.0, 1.0);
 var materialShininess = 100.0;
 
 var vertices = [
@@ -80,14 +90,6 @@ var vertices = [
     vec4(0.75, 0.45, -0.45, 1.0),   //22
     vec4(0.75, 0.45, 0.45, 1.0)     //23
 
-    // vec4( -0.5, -0.5,  0.5, 1.0 ),
-    // vec4( -0.5,  0.5,  0.5, 1.0 ),
-    // vec4( 0.5,  0.5,  0.5, 1.0 ),
-    // vec4( 0.5, -0.5,  0.5, 1.0 ),
-    // vec4( -0.5, -0.5, -0.5, 1.0 ),
-    // vec4( -0.5,  0.5, -0.5, 1.0 ),
-    // vec4( 0.5,  0.5, -0.5, 1.0 ),
-    // vec4( 0.5, -0.5, -0.5, 1.0 )
 ];
 
 // var vertexColors = [
@@ -239,17 +241,27 @@ window.onload = function init() {
 
     thetaLoc = gl.getUniformLocation(program, "theta");
 
-    var ambientProduct = mult(lightAmbient, materialAmbient);
-    var diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    var specularProduct = mult(lightSpecular, materialSpecular);
+    var posambientProduct = mult(poslightAmbient, materialAmbient);
+    var posdiffuseProduct = mult(poslightDiffuse, materialDiffuse);
+    var posspecularProduct = mult(poslightSpecular, materialSpecular);
+
+    var OneDirAmbientProduct = mult(oneDirlightAmbient, materialAmbient);
+    var OneDirDiffuseProduct = mult(oneDirlightDiffuse, materialDiffuse);
+    var OneDirSpecularProduct = mult(oneDirlightSpecular, materialSpecular);
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
 
-    gl.uniform4fv(gl.getUniformLocation(program, "uAmbientProduct"), ambientProduct);
-    gl.uniform4fv(gl.getUniformLocation(program, "uDiffuseProduct"), diffuseProduct );
-    gl.uniform4fv(gl.getUniformLocation(program, "uSpecularProduct"), specularProduct );
+    gl.uniform4fv(gl.getUniformLocation(program, "uPosAmbientProduct"), posambientProduct);
+    gl.uniform4fv(gl.getUniformLocation(program, "uPosDiffuseProduct"), posdiffuseProduct );
+    gl.uniform4fv(gl.getUniformLocation(program, "uPosSpecularProduct"), posspecularProduct );
+
+    gl.uniform4fv(gl.getUniformLocation(program, "uOneDirAmbientProduct"), OneDirAmbientProduct);
+    gl.uniform4fv(gl.getUniformLocation(program, "uOneDirDiffuseProduct"), OneDirDiffuseProduct );
+    gl.uniform4fv(gl.getUniformLocation(program, "uOneDirSpecularProduct"), OneDirSpecularProduct );
+
     gl.uniform4fv(gl.getUniformLocation(program, "uLightPosition"), lightPosition );
+    gl.uniform4fv(gl.getUniformLocation(program, "uoneDirLightPosition"), oneDirLightPosition );
     
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
 
