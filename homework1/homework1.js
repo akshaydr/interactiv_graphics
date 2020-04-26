@@ -9,6 +9,7 @@ var numChecks = 24;
 
 var c;
 
+var cartoonflag = false; 
 var rotateflag = false;
 var flag = true;
 var thetaflag = true;
@@ -52,6 +53,8 @@ var modelViewMatrixLoc, projectionMatrixLoc, rotationMatrixLoc, spotrotationMatr
 var eyeloc;
 
 // Exercise 3
+var globalLightAmbient = vec4(0.0, 1.0, 0.5, 1.0 );
+
 var oneDirLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
 var oneDirlightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var oneDirlightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -74,30 +77,162 @@ var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
 var materialShininess = 150.0;
 
 var vertices = [
-    vec4(-0.75, -0.45, -0.45, 1.0), //0
-    vec4(-0.75, -0.45, 0.45, 1.0),  //1
-    vec4(-0.75, 0.45, -0.45, 1.0),  //2
-    vec4(-0.75, 0.45, 0.45, 1.0),   //3
-    vec4(-0.45, -0.75, -0.45, 1.0), //4
-    vec4(-0.45, -0.75, 0.45, 1.0),  //5
-    vec4(-0.45, -0.45, -0.75, 1.0), //6
-    vec4(-0.45, -0.45, 0.75, 1.0),  //7
-    vec4(-0.45, 0.45, -0.75, 1.0),  //8
-    vec4(-0.45, 0.45, 0.75, 1.0),   //9
-    vec4(-0.45, 0.75, -0.45, 1.0),  //10
-    vec4(-0.45, 0.75, 0.45, 1.0),   //11
-    vec4(0.45, -0.75, -0.45, 1.0),  //12
-    vec4(0.45, -0.75, 0.45, 1.0),   //13
-    vec4(0.45, -0.45, -0.75, 1.0),  //14
-    vec4(0.45, -0.45, 0.75, 1.0),   //45
-    vec4(0.45, 0.45, -0.75, 1.0),   //16
-    vec4(0.45, 0.45, 0.75, 1.0),    //17
-    vec4(0.45, 0.75, -0.45, 1.0),   //18
-    vec4(0.45, 0.75, 0.45, 1.0),    //19
-    vec4(0.75, -0.45, -0.45, 1.0),  //20
-    vec4(0.75, -0.45, 0.45, 1.0),   //21
-    vec4(0.75, 0.45, -0.45, 1.0),   //22
-    vec4(0.75, 0.45, 0.45, 1.0)     //23
+    // vec4(-0.75, -0.45, -0.45, 1.0), //0
+    // vec4(-0.75, -0.45, 0.45, 1.0),  //1
+    // vec4(-0.75, 0.45, -0.45, 1.0),  //2
+    // vec4(-0.75, 0.45, 0.45, 1.0),   //3
+    // vec4(-0.45, -0.75, -0.45, 1.0), //4
+    // vec4(-0.45, -0.75, 0.45, 1.0),  //5
+    // vec4(-0.45, -0.45, -0.75, 1.0), //6
+    // vec4(-0.45, -0.45, 0.75, 1.0),  //7
+    // vec4(-0.45, 0.45, -0.75, 1.0),  //8
+    // vec4(-0.45, 0.45, 0.75, 1.0),   //9
+    // vec4(-0.45, 0.75, -0.45, 1.0),  //10
+    // vec4(-0.45, 0.75, 0.45, 1.0),   //11
+    // vec4(0.45, -0.75, -0.45, 1.0),  //12
+    // vec4(0.45, -0.75, 0.45, 1.0),   //13
+    // vec4(0.45, -0.45, -0.75, 1.0),  //14
+    // vec4(0.45, -0.45, 0.75, 1.0),   //45
+    // vec4(0.45, 0.45, -0.75, 1.0),   //16
+    // vec4(0.45, 0.45, 0.75, 1.0),    //17
+    // vec4(0.45, 0.75, -0.45, 1.0),   //18
+    // vec4(0.45, 0.75, 0.45, 1.0),    //19
+    // vec4(0.75, -0.45, -0.45, 1.0),  //20
+    // vec4(0.75, -0.45, 0.45, 1.0),   //21
+    // vec4(0.75, 0.45, -0.45, 1.0),   //22
+    // vec4(0.75, 0.45, 0.45, 1.0)     //23
+    vec4( 0.45, -0.45, -0.75, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( 0.75, 0.45, -0.45, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( 0.45, -0.75, -0.45, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( 0.45, -0.45, -0.75, 1.0),
+    vec4( 0.45, 0.75, -0.45, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( 0.75, 0.45, -0.45, 1.0),
+    vec4( 0.45, -0.75, -0.45, 1.0),
+    vec4( 0.45, -0.45, -0.75, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( 0.45, -0.45, -0.75, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( 0.45, -0.75, -0.45, 1.0),
+    vec4( 0.75, -0.45, 0.45, 1.0),
+    vec4( 0.45, -0.75, -0.45, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( 0.75, -0.45, 0.45, 1.0),
+    vec4( 0.45, 0.75, -0.45, 1.0),
+    vec4( 0.75, 0.45, -0.45, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( 0.75, 0.45, -0.45, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( 0.45, 0.75, -0.45, 1.0),
+    vec4( -0.45, 0.45, -0.75, 1.0),
+    vec4( 0.45, 0.75, -0.45, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( -0.45, 0.45, -0.75, 1.0),
+    vec4( -0.75, -0.45, -0.45, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( 0.75, -0.45, 0.45, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( 0.45, 0.45, 0.75, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( -0.45, -0.75, 0.45, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( 0.45, -0.75, -0.45, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( -0.45, 0.75, 0.45, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( 0.45, 0.75, -0.45, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( -0.75, -0.45, -0.45, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0),
+    vec4( -0.75, 0.45, 0.45, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.45, -0.45, 0.75, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( 0.45, 0.45, 0.75, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.45, -0.45, 0.75, 1.0),
+    vec4( -0.45, -0.75, 0.45, 1.0),
+    vec4( 0.45, -0.45, -0.75, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( 0.45, 0.45, -0.75, 1.0),
+    vec4( -0.45, 0.45, -0.75, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0),
+    vec4( -0.45, 0.45, -0.75, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( 0.75, -0.45, 0.45, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( 0.75, 0.45, -0.45, 1.0),
+    vec4( 0.75, -0.45, -0.45, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( -0.75, 0.45, 0.45, 1.0),
+    vec4( -0.45, 0.75, 0.45, 1.0),
+    vec4( -0.45, -0.45, 0.75, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.75, 0.45, 0.45, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( -0.75, 0.45, 0.45, 1.0),
+    vec4( -0.45, 0.75, -0.45, 1.0),
+    vec4( -0.45, 0.75, 0.45, 1.0),
+    vec4( -0.75, 0.45, 0.45, 1.0),
+    vec4( 0.45, 0.75, 0.45, 1.0),
+    vec4( 0.45, 0.45, 0.75, 1.0),
+    vec4( -0.45, 0.75, 0.45, 1.0),
+    vec4( 0.45, 0.45, 0.75, 1.0),
+    vec4( -0.45, 0.45, 0.75, 1.0),
+    vec4( -0.45, 0.75, 0.45, 1.0),
+    vec4( 0.45, 0.45, 0.75, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( 0.75, 0.45, 0.45, 1.0),
+    vec4( 0.75, -0.45, 0.45, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( 0.45, -0.45, 0.75, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( -0.45, -0.45, 0.75, 1.0),
+    vec4( 0.45, -0.75, 0.45, 1.0),
+    vec4( -0.45, -0.75, 0.45, 1.0),
+    vec4( -0.45, -0.45, 0.75, 1.0),
+    vec4( -0.45, -0.75, -0.45, 1.0),
+    vec4( -0.75, -0.45, -0.45, 1.0),
+    vec4( -0.45, -0.75, 0.45, 1.0),
+    vec4( -0.75, -0.45, -0.45, 1.0),
+    vec4( -0.75, -0.45, 0.45, 1.0),
+    vec4( -0.45, -0.75, 0.45, 1.0),
+    vec4( -0.75, -0.45, -0.45, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0),
+    vec4( -0.45, -0.45, -0.75, 1.0),
+    vec4( -0.45, 0.45, -0.75, 1.0),
+    vec4( -0.75, 0.45, -0.45, 1.0)
 
 ];
 
@@ -166,46 +301,84 @@ function tri(a, b, c) {
 
 function colorCube()
 {
-    // Sides
-    quad( 2, 3, 1, 0);
-    quad( 0, 1, 5, 4);
-    quad( 4, 5, 13, 12);
-    quad( 12, 13, 21, 20);
-    quad( 20, 21, 23, 22);
-    quad( 22, 23, 19, 18);
-    quad( 18, 19, 11, 10);
-    quad( 10, 11, 3, 2);
+    // // Sides
+    // quad( 2, 3, 1, 0);
+    // quad( 0, 1, 5, 4);
+    // quad( 4, 5, 13, 12);
+    // quad( 12, 13, 21, 20);
+    // quad( 20, 21, 23, 22);
+    // quad( 22, 23, 19, 18);
+    // quad( 18, 19, 11, 10);
+    // quad( 10, 11, 3, 2);
 
-    // Top and Bottom
-    quad( 17, 15, 7, 9);
-    quad( 16, 8, 6, 14);
+    // // Top and Bottom
+    // quad( 17, 15, 7, 9);
+    // quad( 16, 8, 6, 14);
 
-    // Side Up
-    quad( 19, 17, 9, 11 );
-    tri( 11, 9, 3 );
-    quad( 3, 9, 7, 1 );
-    tri( 1, 7, 5 );
-    quad( 5, 7, 15, 13 );
-    tri( 13, 15, 21 );
-    quad( 21, 15, 17, 23 );
-    tri( 23, 17, 19 );
+    // // Side Up
+    // quad( 19, 17, 9, 11 );
+    // tri( 11, 9, 3 );
+    // quad( 3, 9, 7, 1 );
+    // tri( 1, 7, 5 );
+    // quad( 5, 7, 15, 13 );
+    // tri( 13, 15, 21 );
+    // quad( 21, 15, 17, 23 );
+    // tri( 23, 17, 19 );
 
-    // Side bottom
-    quad( 16, 18, 10, 8 );
-    tri( 8, 10, 2 );
-    quad( 8, 2, 0, 6 );
-    tri( 6, 0, 4 );
-    quad( 6, 4, 12, 14 );
-    tri( 14, 12, 20 );
-    quad( 14, 20, 22, 16 );
-    tri( 16, 22, 18 );
+    // // Side bottom
+    // quad( 16, 18, 10, 8 );
+    // tri( 8, 10, 2 );
+    // quad( 8, 2, 0, 6 );
+    // tri( 6, 0, 4 );
+    // quad( 6, 4, 12, 14 );
+    // tri( 14, 12, 20 );
+    // quad( 14, 20, 22, 16 );
+    // tri( 16, 22, 18 );
+    tri( 0, 1, 2, );
+    tri( 3, 4, 5, );
+    tri( 6, 7, 8, );
+    tri( 9, 10, 11, );
+    tri( 12, 13, 14, );
+    tri( 15, 16, 17, );
+    tri( 18, 19, 20, );
+    tri( 21, 22, 23, );
+    tri( 24, 25, 26, );
+    tri( 27, 28, 29, );
+    tri( 30, 31, 32, );
+    tri( 33, 34, 35, );
+    tri( 36, 37, 38, );
+    tri( 39, 40, 41, );
+    tri( 42, 43, 44, );
+    tri( 45, 46, 47, );
+    tri( 48, 49, 50, );
+    tri( 51, 52, 53, );
+    tri( 54, 55, 56, );
+    tri( 57, 58, 59, );
+    tri( 60, 61, 62, );
+    tri( 63, 64, 65, );
+    tri( 66, 67, 68, );
+    tri( 69, 70, 71, );
+    tri( 72, 73, 74, );
+    tri( 75, 76, 77, );
+    tri( 78, 79, 80, );
+    tri( 81, 82, 83, );
+    tri( 84, 85, 86, );
+    tri( 87, 88, 89, );
+    tri( 90, 91, 92, );
+    tri( 93, 94, 95, );
+    tri( 96, 97, 98, );
+    tri( 99, 100, 101, );
+    tri( 102, 103, 104, );
+    tri( 105, 106, 107, );
+    tri( 108, 109, 110, );
+    tri( 111, 112, 113, );
+    tri( 114, 115, 116, );
+    tri( 117, 118, 119, );
+    tri( 120, 121, 122, );
+    tri( 123, 124, 125, );
+    tri( 126, 127, 128, );
+    tri( 129, 130, 131, );
 
-    // quad( 1, 0, 3, 2 );
-    // quad( 2, 3, 7, 6 );
-    // quad( 3, 0, 4, 7 );
-    // quad( 6, 5, 1, 2 );
-    // quad( 4, 5, 6, 7 );
-    // quad( 5, 4, 0, 1 );
 }
 
 
@@ -256,13 +429,23 @@ window.onload = function init() {
     var spotDiffuseProduct = mult(spotLightDiffuse, materialDiffuse);
     var spotSpecularProduct = mult(spotLightSpecular, materialSpecular);
 
+    var globalAmbientProduct = mult(globalLightAmbient, materialAmbient);
+
+    var OneDirCi = add(globalAmbientProduct, OneDirAmbientProduct);
+    var OneDirCs = OneDirCi;
+    OneDirCi = add(OneDirCi, OneDirDiffuseProduct);
+    
+    var SpotCi = add(globalAmbientProduct, spotAmbientProduct);
+    var SpotCs = SpotCi;
+    SpotCi = add(SpotCi, spotDiffuseProduct);
+
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
     rotationMatrixLoc = gl.getUniformLocation(program, "uRotationMatrix");
     spotrotationMatrixLoc = gl.getUniformLocation(program, "uSpotRotationMatrix");
     
-    eyeloc = gl.getUniformLocation(program, "eye");
-
+    gl.uniform4fv(gl.getUniformLocation(program, "uglobalAmbientProduct"), globalAmbientProduct);
+    
     gl.uniform4fv(gl.getUniformLocation(program, "uOneDirAmbientProduct"), OneDirAmbientProduct);
     gl.uniform4fv(gl.getUniformLocation(program, "uOneDirDiffuseProduct"), OneDirDiffuseProduct );
     gl.uniform4fv(gl.getUniformLocation(program, "uOneDirSpecularProduct"), OneDirSpecularProduct );
@@ -275,6 +458,11 @@ window.onload = function init() {
     
     gl.uniform4fv( gl.getUniformLocation(program, "uspotLightPosition"), spotLightPosition );
     gl.uniform4fv(gl.getUniformLocation(program, "uoneDirLightPosition"), oneDirLightPosition );
+    
+    gl.uniform4fv(gl.getUniformLocation(program, "uOneDirCi"), OneDirCi );
+    gl.uniform4fv(gl.getUniformLocation(program, "uOneDirCs"), OneDirCs );
+    gl.uniform4fv(gl.getUniformLocation(program, "uSpotCi"), SpotCi );
+    gl.uniform4fv(gl.getUniformLocation(program, "uSpotCs"), SpotCs );
     
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
 
@@ -291,7 +479,9 @@ window.onload = function init() {
     document.getElementById("yObjButton").onclick = function(){axis = yAxis;};
     document.getElementById("zObjButton").onclick = function(){axis = zAxis;};
     document.getElementById("rotateobj").onchange = function(){rotateflag = !rotateflag;    gl.uniform1f(gl.getUniformLocation(program,"uRflag"),rotateflag);};
-
+    
+    document.getElementById("cartoontoggle").onchange = function(){cartoonflag = !cartoonflag;    gl.uniform1f(gl.getUniformLocation(program,"ucartoonflag"),cartoonflag);};
+    
     // sliders for viewing parameters
     document.getElementById("zNearSlider").oninput=function(event){near = event.target.value;};
     document.getElementById("radiusSlider").oninput=function(event){radius = event.target.value;};

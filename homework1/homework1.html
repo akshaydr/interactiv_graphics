@@ -139,10 +139,10 @@ out vec3 onedirN, onedirL, onedirE, onedirlightpos;
 void main()
 {
     // One Directional Light vectors
-    pos = -(uProjectionMatrix * uModelViewMatrix * uRotationMatrix * aPosition).xyz;
-    onedirN = normalize((uProjectionMatrix * uModelViewMatrix*vec4(aNormal,0)).xyz);
+    pos = -(uModelViewMatrix * aPosition).xyz;
+    onedirN = normalize((uModelViewMatrix*vec4(aNormal,0)).xyz);
  
-    vec3 onedirlightpos = (uProjectionMatrix * uModelViewMatrix * uRotationMatrix * uoneDirLightPosition).xyz;
+    vec3 onedirlightpos = (uRotationMatrix * uoneDirLightPosition).xyz;
 
     onedirL = normalize(onedirlightpos - pos);
     onedirE = normalize(-pos); 
@@ -183,11 +183,15 @@ precision mediump float;
 
 uniform vec4 uOneDirAmbientProduct, uOneDirDiffuseProduct, uOneDirSpecularProduct;
 uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct;
+uniform vec4 uglobalAmbientProduct;
 
 uniform float uShininess;
 uniform float lCutOff;
+uniform bool ucartoonflag;
 
+vec4 Ci, Cs;
 vec4 ambient, diffuse, specular;
+vec4 spotCartoonShade, onedirCartoonShade;
 
 in vec3 spotN, spotL, spotE, spotlightpos;
 in vec3 onedirN, onedirL, onedirE, onedirlightpos;
@@ -224,16 +228,34 @@ void main()
     if (dotdir >= lCutOff) {
         ambient =  oneDirambient + spotDirambient;
         diffuse =  oneDirposdiffuse + spotDirposdiffuse;
-        specular = oneDirposspecular + spotDirposspecular;   
+        specular = oneDirposspecular + spotDirposspecular; 
+        
+        if (max(dot(spotL, spotN), 0.0) >= 0.5) {spotCartoonShade =  uSpotAmbientProduct + uSpotDiffuseProduct;}
+        else {spotCartoonShade =  uSpotAmbientProduct;}
+
+        if (max(dot(onedirL, onedirN), 0.0) >= 0.5) {onedirCartoonShade =  uOneDirAmbientProduct + uOneDirDiffuseProduct;}
+        else {onedirCartoonShade =  uOneDirAmbientProduct;}
+
+        spotCartoonShade = spotCartoonShade + uglobalAmbientProduct;
+        onedirCartoonShade = onedirCartoonShade + uglobalAmbientProduct;
+
     }
     else {
         ambient =  oneDirambient;
         diffuse = oneDirposdiffuse;
-        specular = oneDirposspecular;   
+        specular = oneDirposspecular; 
+        
+        if (max(dot(onedirL, onedirN), 0.0) >= 0.5) {onedirCartoonShade = uglobalAmbientProduct + uOneDirAmbientProduct + uOneDirDiffuseProduct;}
+        else {onedirCartoonShade = uglobalAmbientProduct + uOneDirAmbientProduct;}
+        
+        spotCartoonShade = vec4(0.0, 0.0, 0.0, 0.0);
+
     }
 
     // fColor = oneDirambient + oneDirposdiffuse + oneDirposspecular;
-    fColor = ambient + diffuse + specular;
+    if(ucartoonflag){fColor = spotCartoonShade + onedirCartoonShade;}
+    else fColor = ambient + diffuse + specular;
+    
 
     fColor.a = 1.0;
 
@@ -289,6 +311,12 @@ Oops ... your browser doesn't support the HTML5 canvas element
     <div>Rotation X <br/> -180    <input id="spotlightx"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Rotation Y <br/> -180    <input id="spotlighty"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Limit      <br/> 0       <input id="limit"       type="range" min="0.0" max="90.0" step="0.1" value="5"   class="slider" />90  </div>
+    <br/>
+</div>
+
+<div style = "position:relative; left:600px; top:-850px;">
+    <p> Cartoon Shading Toggle Button </p>
+    <label class="switch" id= "cartoontoggle"><input type="checkbox"><span class="slider2 round"></span></label>
     <br/>
 </div>
 
