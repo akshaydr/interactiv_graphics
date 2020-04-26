@@ -53,7 +53,7 @@ var modelViewMatrixLoc, projectionMatrixLoc, rotationMatrixLoc, spotrotationMatr
 var eyeloc;
 
 // Exercise 3
-var oneDirLightPosition = vec4(0.0, 0.0, 1.0, 0.0 );
+var oneDirLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
 var oneDirlightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var oneDirlightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -64,7 +64,7 @@ var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 // var oneDirlightSpecular = vec4( 0.0, 0.0, 0.0, 0.0 );
 
 var spotLightPosition = vec4(0.0, 0.0, 1.0, 0.0 );
-var spotLightAmbient =  vec4(0.2, 0.2, 0.2, 1.0 );
+var spotLightAmbient =  vec4(1.0, 1.0, 1.0, 1.0 );
 var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lCutOff=0.867;

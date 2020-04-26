@@ -128,16 +128,26 @@ uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uRotationMatrix, uSpotRotationMatrix;
 
-uniform vec4 uspotLightPosition;
+uniform vec4 uspotLightPosition, uoneDirLightPosition;
 uniform bool uRflag;
 
-vec3 spotpos;
+vec3 spotpos, pos;
 
 out vec3 spotN, spotL, spotE, spotlightpos;
-out vec3 oneN, oneL, oneE, onedirlightpos;
+out vec3 onedirN, onedirL, onedirE, onedirlightpos;
  
 void main()
 {
+    // One Directional Light vectors
+    pos = -(uProjectionMatrix * uModelViewMatrix * uRotationMatrix * aPosition).xyz;
+    onedirN = normalize((uProjectionMatrix * uModelViewMatrix*vec4(aNormal,0)).xyz);
+ 
+    vec3 onedirlightpos = (uProjectionMatrix * uModelViewMatrix * uRotationMatrix * uoneDirLightPosition).xyz;
+
+    onedirL = normalize(onedirlightpos - pos);
+    onedirE = normalize(-pos); 
+
+    // Spotlight vectors
     if (uRflag) {
         spotpos = -(uModelViewMatrix * aPosition).xyz;
         spotN = normalize((uModelViewMatrix*vec4(aNormal,0)).xyz);
@@ -172,18 +182,33 @@ void main()
 
 precision mediump float;
 
+uniform vec4 uOneDirAmbientProduct, uOneDirDiffuseProduct, uOneDirSpecularProduct;
 uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct;
+
 uniform float uShininess;
 uniform float lCutOff;
 
 vec4 ambient, diffuse, specular;
 
 in vec3 spotN, spotL, spotE, spotlightpos;
+in vec3 onedirN, onedirL, onedirE, onedirlightpos;
 out vec4 fColor;
 
 void main()
 {
+    // One Directional Light Computation
+    vec3 onedirH = normalize(onedirL + onedirE);
 
+    float onedirKd=max(dot(onedirL, onedirN),0.0);    
+    float onedirKs=pow(max(dot(onedirN, onedirH),0.0), uShininess);
+    vec4 oneDirambient = uOneDirAmbientProduct;
+    vec4 oneDirposdiffuse = onedirKd*uOneDirDiffuseProduct;
+    vec4 oneDirposspecular = onedirKs*uOneDirSpecularProduct;   
+    if(dot(onedirL, onedirN)<0.0){
+        oneDirposspecular = vec4(0.0,0.0,0.0,1.0);
+    }
+
+    // Spotlight Computation
     vec3 spotH = normalize(spotN + spotE);
 
     float Kd=max(dot(spotL, spotN),0.0);    
@@ -198,12 +223,19 @@ void main()
     float dotdir = dot(normalize(spotL + spotE), -spotlightpos);
     
     if (dotdir >= lCutOff) {
-        ambient =  spotDirambient;
-        diffuse = spotDirposdiffuse;
-        specular = spotDirposspecular;   
+        ambient =  oneDirambient + spotDirambient;
+        diffuse =  oneDirposdiffuse + spotDirposdiffuse;
+        specular = oneDirposspecular + spotDirposspecular;   
+    }
+    else {
+        ambient =  oneDirambient;
+        diffuse = oneDirposdiffuse;
+        specular = oneDirposspecular;   
     }
 
+    // fColor = oneDirambient + oneDirposdiffuse + oneDirposspecular;
     fColor = ambient + diffuse + specular;
+
     fColor.a = 1.0;
 
 }
