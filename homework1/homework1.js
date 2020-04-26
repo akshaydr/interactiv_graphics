@@ -63,11 +63,10 @@ var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 // var oneDirlightDiffuse = vec4( 0.0, 0.0, 0.0, 0.0 );
 // var oneDirlightSpecular = vec4( 0.0, 0.0, 0.0, 0.0 );
 
-var spotLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
-var spotLightAmbient = vec4(0.0, 1.0, 0.0, 1.0 );
-var spotLightDiffuse = vec4( 0.0, 1.0, 0.0, 1.0 );
-var spotLightSpecular = vec4( 0.0, 1.0, 0.0, 1.0 );
-var spotLightDirection = vec4(0.0, 1.0, 0.0, 1.0);
+var spotLightPosition = vec4(0.0, 0.0, 1.0, 0.0 );
+var spotLightAmbient =  vec4(0.2, 0.2, 0.2, 1.0 );
+var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lCutOff=0.867;
 
 var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
@@ -274,8 +273,8 @@ window.onload = function init() {
     gl.uniform4fv(gl.getUniformLocation(program, "uSpotSpecularProduct"), spotSpecularProduct );
 
     gl.uniform1f( gl.getUniformLocation(program, "lCutOff"),lCutOff );
-    gl.uniform1f( gl.getUniformLocation(program, "uspotLightDirection"), spotLightDirection );
-
+    
+    gl.uniform4fv( gl.getUniformLocation(program, "uspotLightPosition"), spotLightPosition );
     gl.uniform4fv(gl.getUniformLocation(program, "uoneDirLightPosition"), oneDirLightPosition );
     
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
@@ -341,6 +340,7 @@ var render = function() {
         radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
         modelViewMatrix = lookAt(eye, at, up);
     }
+    console.log(near);
     projectionMatrix = perspective(fovy, aspect, near, far);
     
     gl.uniform3fv(eyeloc, eye);
