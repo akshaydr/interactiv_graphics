@@ -124,58 +124,33 @@
 
 in  vec4 aPosition;
 in  vec3 aNormal;
-out vec4 vColor;
-
-uniform vec4 uOneDirAmbientProduct, uOneDirDiffuseProduct, uOneDirSpecularProduct;
-
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
-
 uniform mat4 uRotationMatrix;
-uniform bool uRflag;
 
 uniform vec4 uoneDirLightPosition;
+uniform bool uRflag;
 
-uniform float uShininess;
-
+out vec3 N, L, E, onedirlightpos;
+ 
 void main()
 {
     vec3 pos = -(uProjectionMatrix * uModelViewMatrix * uRotationMatrix * aPosition).xyz;
-    vec3 N = normalize((uProjectionMatrix * uModelViewMatrix*vec4(aNormal,0)).xyz);
+    N = normalize((uProjectionMatrix * uModelViewMatrix*vec4(aNormal,0)).xyz);
  
     // Directional Light
-    vec3 onedirlightpos = (uProjectionMatrix * uModelViewMatrix * uRotationMatrix * uoneDirLightPosition).xyz;
+    onedirlightpos = (uProjectionMatrix * uModelViewMatrix * uRotationMatrix * uoneDirLightPosition).xyz;
+  
+   
+    L = normalize(onedirlightpos - pos);
+    E = normalize(-pos); 
 
-    // vec3 L = normalize(onedirlightpos);
-    vec3 L = normalize(onedirlightpos - pos);
-    vec3 E = normalize(-pos); 
-    vec3 H = normalize(L + E);
-
-    float Kd=max(dot(L, N),0.0);    
-    float Ks=pow(max(dot(N, H),0.0), uShininess);
-    vec4 oneDirambient = uOneDirAmbientProduct;
-    vec4 oneDirposdiffuse = Kd*uOneDirDiffuseProduct;
-    vec4 oneDirposspecular = Ks*uOneDirSpecularProduct;   
-    if(dot(L, N)<0.0){
-        oneDirposspecular = vec4(0.0,0.0,0.0,1.0);
-    }
-
-    // Spotlight
-
-    // Combining light sources
-    vec4 ambient =  oneDirambient;
-    vec4 diffuse = oneDirposdiffuse;
-    vec4 specular = oneDirposspecular;
-    
     if (uRflag) {
         gl_Position = uModelViewMatrix *aPosition; 
     }
     else {
         gl_Position = uProjectionMatrix * uModelViewMatrix *aPosition;
     }
-
-    vColor = ambient + diffuse + specular;
-    vColor.a = 1.0;
 }
 </script>
 
@@ -184,13 +159,48 @@ void main()
 
 precision mediump float;
 
-in vec4 vColor;
+uniform vec4 uOneDirAmbientProduct, uOneDirDiffuseProduct, uOneDirSpecularProduct;
+uniform float uShininess;
+uniform float lCutOff;
+
+vec4 ambient, diffuse, specular;
+
+in vec3 N, L, E, onedirlightpos;
 out vec4 fColor;
 
-void
-main()
+void main()
 {
-    fColor = vColor;
+
+    vec3 H = normalize(L + E);
+
+    vec4 ucolor = vec4(0.2, 1.0, 0.2, 1.0);
+    float light = 0.0;
+
+    float Kd=max(dot(L, N),0.0);    
+    // float Ks=pow(max(dot(N, H),0.0), uShininess);
+    float Ks= max(dot(N, H),0.0);
+    vec4 oneDirambient = uOneDirAmbientProduct;
+    vec4 oneDirposdiffuse = Kd*uOneDirDiffuseProduct;
+    vec4 oneDirposspecular = Ks*uOneDirSpecularProduct;   
+    if(dot(L, N)<0.0){
+        oneDirposspecular = vec4(0.0,0.0,0.0,1.0);
+    }
+    float dotdir = dot(H, -onedirlightpos);
+
+    if (dotdir >= lCutOff) {
+        ambient =  oneDirambient;
+        diffuse = oneDirposdiffuse;
+        specular = oneDirposspecular;   
+        //light = max(dot(L, N),0.0);
+
+        //specular = Ks*uOneDirSpecularProduct;   
+        //if(dot(L, N)<0.0){
+        //    specular = vec4(0.0,0.0,0.0,1.0);
+        //}   
+    }
+
+    fColor = ambient + diffuse + specular;
+    fColor.a = 1.0;
 
 }
 </script>
@@ -244,90 +254,17 @@ Oops ... your browser doesn't support the HTML5 canvas element
     <div>Rotation X <br/> -180    <input id="spotlightx"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Rotation Y <br/> -180    <input id="spotlighty"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Rotation Z <br/> -180    <input id="spotlightz"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
+    <div>Limit      <br/> 0       <input id="limit"  type="range" min="0.0" max="180.0" step="0.1" value="20"   class="slider" />180  </div>
     <br/>
 </div>
 
 </body>
 </html>
 
-
-<!-- #version 300 es
-
-in  vec4 aPosition;
-in  vec3 aNormal;
-out vec4 vColor;
-
-uniform vec4 uOneDirAmbientProduct, uOneDirDiffuseProduct, uOneDirSpecularProduct;
-
-uniform vec4 uSpotAmbientProduct, uSpotDiffuseProduct, uSpotSpecularProduct;
-uniform vec4 uspotLightPosition, uspotLightDirection;
-uniform float lCutOff;
-
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
-
-uniform mat4 uRotationMatrix;
-uniform bool uRflag;
-
-uniform vec4 uoneDirLightPosition;
-
-uniform float uShininess;
-
-void main()
-{
-    vec3 pos = -(uModelViewMatrix * uRotationMatrix * aPosition).xyz;
-    vec3 N = normalize((uModelViewMatrix*vec4(aNormal,0)).xyz);
-
-    // Directional Light
-    vec3 onedirlightpos = (uModelViewMatrix * uRotationMatrix * uoneDirLightPosition).xyz;
-
-    // vec3 L = normalize(onedirlightpos);
-    vec3 L = normalize(onedirlightpos - pos);
-    vec3 E = normalize(-pos); 
-    vec3 H = normalize(L + E);
-
-    float Kd=max(dot(L, N),0.0);    
-    float Ks=pow(max(dot(N, H),0.0), uShininess);
-    vec4 oneDirambient = uOneDirAmbientProduct;
-    vec4 oneDirposdiffuse = Kd*uOneDirDiffuseProduct;
-    vec4 oneDirposspecular = Ks*uOneDirSpecularProduct;   
-    if(dot(L, N)<0.0){
-        oneDirposspecular = vec4(0.0,0.0,0.0,1.0);
-    }
-
-    // Spotlight
-    vec3 spotlightpos = uspotLightPosition.xyz;
-    
-    L=normalize(spotlightpos);
-    E=normalize(-pos);
-    H=normalize(L + E);
-    
-    vec3 lightdir = uspotLightDirection.xyz;
-    
-    Kd = max(dot(L , N), 0.0);
-    Ks=pow(max(dot(N , H), 0.0), shininess);
-    vec4 spotambient = uSpotAmbientProduct;
-    vec4 spotdiffuse = Kd * uSpotDiffuseProduct;
-    vec4 spotspecular = Ks * uSpotSpecularProduct;
-    if(dot(L , N) < 0.0){
-        spotspecular=vec4(0.0,0.0,0.0,1.0);
-    }
-    
-    // Combining light sources
-    float lEffect= dot(normalize(lightdir), normalize(L + E));
-    if(lEffect>lCutOff) {
-        vec4 ambient =  oneDirambient + spotambient;
-        vec4 diffuse = oneDirposdiffuse + spotdiffuse;
-        vec4 specular = oneDirposspecular + spotspecular;
-    }
-    else {
-        vec4 ambient =  oneDirambient;
-        vec4 diffuse = oneDirposdiffuse;
-        vec4 specular = oneDirposspecular;    
-    }
-    if (uRflag) gl_Position = uModelViewMatrix *aPosition;
-    else gl_Position = uProjectionMatrix * uModelViewMatrix *aPosition;
-
-    vColor = ambient + diffuse + specular;
-    vColor.a = 1.0;
+<!-- if (dotdir < lCutOff) {
+    ambient =  oneDirambient;
+    diffuse = oneDirposdiffuse;
+    specular = oneDirposspecular;    
+    fColor = ambient + diffuse + specular;
+    fColor.a = 1.0;
 } -->

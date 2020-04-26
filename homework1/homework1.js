@@ -16,9 +16,14 @@ var phiflag = true;
 
 var objtheta = [0, 0, 0];
 var lighttheta = [0, 0, 0];
+var spotlighttheta = [0, 0, 0];
+
 var lightanglex = 0.0;
 var lightangley = 0.0;
 var lightanglez = 0.0;
+var spotlightanglex = 0.0;
+var spotlightangley = 0.0;
+var spotlightanglez = 0.0;
 
 var near = 0.3;
 var far = 1.0;
@@ -43,8 +48,9 @@ var yAxis = 1;
 var zAxis = 2;
 var axis = 0;
 
-var modelViewMatrix, projectionMatrix, rotationMatrix;
-var modelViewMatrixLoc, projectionMatrixLoc, rotationMatrixLoc;
+var modelViewMatrix, projectionMatrix, rotationMatrix, spotrotationMatrix;
+var modelViewMatrixLoc, projectionMatrixLoc, rotationMatrixLoc, spotrotationMatrixLoc;
+var eyeloc;
 
 // Exercise 3
 var oneDirLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
@@ -57,17 +63,17 @@ var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 // var oneDirlightDiffuse = vec4( 0.0, 0.0, 0.0, 0.0 );
 // var oneDirlightSpecular = vec4( 0.0, 0.0, 0.0, 0.0 );
 
-var spotLightPosition = vec4(1.0, 2.0, 3.0, 1.0 );
-var spotLightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
-var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
-var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
-var spotLightDirection = vec4(-0.5,1.0,2.0,1.0);
+var spotLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
+var spotLightAmbient = vec4(0.0, 1.0, 0.0, 1.0 );
+var spotLightDiffuse = vec4( 0.0, 1.0, 0.0, 1.0 );
+var spotLightSpecular = vec4( 0.0, 1.0, 0.0, 1.0 );
+var spotLightDirection = vec4(0.0, 1.0, 0.0, 1.0);
 var lCutOff=0.867;
 
 var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
 var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
 var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
-var materialShininess = 100.0;
+var materialShininess = 150.0;
 
 var vertices = [
     vec4(-0.75, -0.45, -0.45, 1.0), //0
@@ -255,6 +261,9 @@ window.onload = function init() {
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
     rotationMatrixLoc = gl.getUniformLocation(program, "uRotationMatrix");
+    spotrotationMatrixLoc = gl.getUniformLocation(program, "uSpotRotationMatrix");
+    
+    eyeloc = gl.getUniformLocation(program, "eye");
 
     gl.uniform4fv(gl.getUniformLocation(program, "uOneDirAmbientProduct"), OneDirAmbientProduct);
     gl.uniform4fv(gl.getUniformLocation(program, "uOneDirDiffuseProduct"), OneDirDiffuseProduct );
@@ -279,6 +288,7 @@ window.onload = function init() {
     document.getElementById("spotlightx").onchange=function(event){spotlightanglex = event.target.value;};
     document.getElementById("spotlighty").onchange=function(event){spotlightangley = event.target.value;};
     document.getElementById("spotlightz").onchange=function(event){spotlightanglez = event.target.value;};
+    document.getElementById("limit").onchange=function(event){gl.uniform1f(gl.getUniformLocation(program,"lCutOff"), Math.cos(event.target.value* Math.PI/180.0));};
 
     document.getElementById("xObjButton").onclick = function(){axis = xAxis;};
     document.getElementById("yObjButton").onclick = function(){axis = yAxis;};
@@ -308,6 +318,14 @@ var render = function() {
     rotationMatrix = mult(rotationMatrix, rotate(lighttheta[yAxis], vec3(0, 1, 0)));
     rotationMatrix = mult(rotationMatrix, rotate(lighttheta[zAxis], vec3(0, 0, 1)));
 
+    spotlighttheta[xAxis] = spotlightanglex;
+    spotlighttheta[yAxis] = spotlightangley;
+    spotlighttheta[zAxis] = spotlightanglez;
+    spotrotationMatrix = mat4();
+    spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[xAxis], vec3(1, 0, 0)));
+    spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[yAxis], vec3(0, 1, 0)));
+    spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[zAxis], vec3(0, 0, 1)));
+
     // var spotlightmatrix 
     
     if(rotateflag) { 
@@ -323,12 +341,13 @@ var render = function() {
         radius*Math.sin(theta)*Math.sin(phi), radius*Math.cos(theta));
         modelViewMatrix = lookAt(eye, at, up);
     }
-    
     projectionMatrix = perspective(fovy, aspect, near, far);
     
-    gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
+    gl.uniform3fv(eyeloc, eye);
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
+    gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationMatrix));
+    gl.uniformMatrix4fv(spotrotationMatrixLoc, false, flatten(spotrotationMatrix));
 
     gl.drawArrays( gl.TRIANGLES, 0, numVertices );
 
