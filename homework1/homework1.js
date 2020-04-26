@@ -53,7 +53,7 @@ var modelViewMatrixLoc, projectionMatrixLoc, rotationMatrixLoc, spotrotationMatr
 var eyeloc;
 
 // Exercise 3
-var oneDirLightPosition = vec4(1.0, 1.0, 1.0, 1.0 );
+var oneDirLightPosition = vec4(0.0, 0.0, 1.0, 0.0 );
 var oneDirlightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var oneDirlightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
@@ -281,14 +281,14 @@ window.onload = function init() {
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
 
     //event listeners for buttons
-    document.getElementById("lightx").onchange=function(event){lightanglex = event.target.value;};
-    document.getElementById("lighty").onchange=function(event){lightangley = event.target.value;};
-    document.getElementById("lightz").onchange=function(event){lightanglez = event.target.value;};
+    document.getElementById("lightx").oninput=function(event){lightanglex = event.target.value;};
+    document.getElementById("lighty").oninput=function(event){lightangley = event.target.value;};
+    document.getElementById("lightz").oninput=function(event){lightanglez = event.target.value;};
 
-    document.getElementById("spotlightx").onchange=function(event){spotlightanglex = event.target.value;};
-    document.getElementById("spotlighty").onchange=function(event){spotlightangley = event.target.value;};
-    document.getElementById("spotlightz").onchange=function(event){spotlightanglez = event.target.value;};
-    document.getElementById("limit").onchange=function(event){gl.uniform1f(gl.getUniformLocation(program,"lCutOff"), Math.cos(event.target.value* Math.PI/180.0));};
+    document.getElementById("spotlightx").oninput=function(event){spotlightanglex = event.target.value;};
+    document.getElementById("spotlighty").oninput=function(event){spotlightangley = event.target.value;};
+    document.getElementById("spotlightz").oninput=function(event){spotlightanglez = event.target.value;};
+    document.getElementById("limit").oninput=function(event){gl.uniform1f(gl.getUniformLocation(program,"lCutOff"), Math.cos(event.target.value* Math.PI/180.0));};
 
     document.getElementById("xObjButton").onclick = function(){axis = xAxis;};
     document.getElementById("yObjButton").onclick = function(){axis = yAxis;};
@@ -296,11 +296,11 @@ window.onload = function init() {
     document.getElementById("rotateobj").onchange = function(){rotateflag = !rotateflag;    gl.uniform1f(gl.getUniformLocation(program,"uRflag"),rotateflag);};
 
     // sliders for viewing parameters
-    document.getElementById("zNearSlider").onchange=function(event){near = event.target.value;};
-    document.getElementById("radiusSlider").onchange=function(event){radius = event.target.value;};
-    document.getElementById("thetaSlider").onchange=function(event){theta = event.target.value* Math.PI/180.0;};
-    document.getElementById("phiSlider").onchange=function(event){phi = event.target.value* Math.PI/180.0;};
-    document.getElementById("fovSlider").onchange=function(event){fovy = event.target.value;};
+    document.getElementById("zNearSlider").oninput=function(event){near = event.target.value;};
+    document.getElementById("radiusSlider").oninput=function(event){radius = event.target.value;};
+    document.getElementById("thetaSlider").oninput=function(event){theta = event.target.value* Math.PI/180.0;};
+    document.getElementById("phiSlider").oninput=function(event){phi = event.target.value* Math.PI/180.0;};
+    document.getElementById("fovSlider").oninput=function(event){fovy = event.target.value;};
 
     render();
 }
