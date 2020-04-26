@@ -23,7 +23,6 @@ var lightangley = 0.0;
 var lightanglez = 0.0;
 var spotlightanglex = 0.0;
 var spotlightangley = 0.0;
-var spotlightanglez = 0.0;
 
 var near = 0.3;
 var far = 1.0;
@@ -286,7 +285,6 @@ window.onload = function init() {
 
     document.getElementById("spotlightx").oninput=function(event){spotlightanglex = event.target.value;};
     document.getElementById("spotlighty").oninput=function(event){spotlightangley = event.target.value;};
-    document.getElementById("spotlightz").oninput=function(event){spotlightanglez = event.target.value;};
     document.getElementById("limit").oninput=function(event){gl.uniform1f(gl.getUniformLocation(program,"lCutOff"), Math.cos(event.target.value* Math.PI/180.0));};
 
     document.getElementById("xObjButton").onclick = function(){axis = xAxis;};
@@ -319,11 +317,9 @@ var render = function() {
 
     spotlighttheta[xAxis] = spotlightanglex;
     spotlighttheta[yAxis] = spotlightangley;
-    spotlighttheta[zAxis] = spotlightanglez;
     spotrotationMatrix = mat4();
     spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[xAxis], vec3(1, 0, 0)));
     spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[yAxis], vec3(0, 1, 0)));
-    spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[zAxis], vec3(0, 0, 1)));
 
     // var spotlightmatrix 
     

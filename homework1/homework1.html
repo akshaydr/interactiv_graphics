@@ -157,7 +157,6 @@ void main()
         spotN = normalize((uProjectionMatrix * uModelViewMatrix*vec4(aNormal,0)).xyz);
     }
 
-    // Directional Light
     if (uRflag) {
         spotlightpos = ( uSpotRotationMatrix * uspotLightPosition).xyz;
     }
@@ -264,7 +263,7 @@ Oops ... your browser doesn't support the HTML5 canvas element
     <br/>
 
 <p> Perspective Position </p>
-<div>zNear<br/>0.01<input id="zNearSlider" type="range" min="0.01" max="3" step="0.01" value="1.97" class="slider"/>3</div>
+<div>zNear<br/>0.01<input id="zNearSlider" type="range" min="0.01" max="3" step="0.01" value="0.3" class="slider"/>3</div>
 <div>fov<br/> 10.0     <input id="fovSlider"   type="range" min="10"   max="120"  step="5"   value="45"  class="slider" />120 </div>
 <br/>
 </div>
@@ -289,8 +288,7 @@ Oops ... your browser doesn't support the HTML5 canvas element
     <p> Spotlight Position </p>
     <div>Rotation X <br/> -180    <input id="spotlightx"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Rotation Y <br/> -180    <input id="spotlighty"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
-    <div>Rotation Z <br/> -180    <input id="spotlightz"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
-    <div>Limit      <br/> 0       <input id="limit"       type="range" min="0.0" max="180.0" step="0.1" value="160"   class="slider" />180  </div>
+    <div>Limit      <br/> 0       <input id="limit"       type="range" min="0.0" max="90.0" step="0.1" value="5"   class="slider" />90  </div>
     <br/>
 </div>
 
