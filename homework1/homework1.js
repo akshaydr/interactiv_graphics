@@ -8,12 +8,15 @@ var numVertices  = 132;
 var numChecks = 24;
 
 var c;
+var program;
 
 var cartoonflag = false; 
 var rotateflag = false;
+var textureflag = false;
 var flag = true;
 var thetaflag = true;
 var phiflag = true;
+var textcord = true;
 
 var objtheta = [0, 0, 0];
 var lighttheta = [0, 0, 0];
@@ -36,6 +39,7 @@ var dr = 5.0 * Math.PI/180.0;
 var pointsArray = [];
 var colorsArray = [];
 var normalsArray = [];
+var texCoordsArray = [];
 
 var  fovy = 45.0;  // Field-of-view in Y direction angle (in degrees)
 var  aspect = 1.0;       // Viewport aspect ratio
@@ -76,31 +80,16 @@ var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
 var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
 var materialShininess = 150.0;
 
+var texture;
+
+var texCoord = [
+    vec2(0, 0),
+    vec2(0, 1),
+    vec2(1, 1),
+    vec2(1, 0)
+];
+
 var vertices = [
-    // vec4(-0.75, -0.45, -0.45, 1.0), //0
-    // vec4(-0.75, -0.45, 0.45, 1.0),  //1
-    // vec4(-0.75, 0.45, -0.45, 1.0),  //2
-    // vec4(-0.75, 0.45, 0.45, 1.0),   //3
-    // vec4(-0.45, -0.75, -0.45, 1.0), //4
-    // vec4(-0.45, -0.75, 0.45, 1.0),  //5
-    // vec4(-0.45, -0.45, -0.75, 1.0), //6
-    // vec4(-0.45, -0.45, 0.75, 1.0),  //7
-    // vec4(-0.45, 0.45, -0.75, 1.0),  //8
-    // vec4(-0.45, 0.45, 0.75, 1.0),   //9
-    // vec4(-0.45, 0.75, -0.45, 1.0),  //10
-    // vec4(-0.45, 0.75, 0.45, 1.0),   //11
-    // vec4(0.45, -0.75, -0.45, 1.0),  //12
-    // vec4(0.45, -0.75, 0.45, 1.0),   //13
-    // vec4(0.45, -0.45, -0.75, 1.0),  //14
-    // vec4(0.45, -0.45, 0.75, 1.0),   //45
-    // vec4(0.45, 0.45, -0.75, 1.0),   //16
-    // vec4(0.45, 0.45, 0.75, 1.0),    //17
-    // vec4(0.45, 0.75, -0.45, 1.0),   //18
-    // vec4(0.45, 0.75, 0.45, 1.0),    //19
-    // vec4(0.75, -0.45, -0.45, 1.0),  //20
-    // vec4(0.75, -0.45, 0.45, 1.0),   //21
-    // vec4(0.75, 0.45, -0.45, 1.0),   //22
-    // vec4(0.75, 0.45, 0.45, 1.0)     //23
     vec4( 0.45, -0.45, -0.75, 1.0),
     vec4( 0.75, -0.45, -0.45, 1.0),
     vec4( 0.45, 0.45, -0.75, 1.0),
@@ -236,47 +225,17 @@ var vertices = [
 
 ];
 
-// var vertexColors = [
-//     vec4( 0.0, 0.0, 0.0, 1.0 ),  // black
-//     vec4( 1.0, 0.0, 0.0, 1.0 ),  // red
-//     vec4( 1.0, 1.0, 0.0, 1.0 ),  // yellow
-//     vec4( 0.0, 1.0, 0.0, 1.0 ),  // green
-//     vec4( 0.0, 0.0, 1.0, 1.0 ),  // blue
-//     vec4( 1.0, 0.0, 1.0, 1.0 ),  // magenta
-//     vec4( 0.0, 1.0, 1.0, 1.0 ),  // white
-//     vec4( 0.0, 1.0, 1.0, 1.0 ),   // cyan
-// ];
+function configureTexture( image ) {
+    texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
+         gl.RGB, gl.UNSIGNED_BYTE, image);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
+                      gl.NEAREST_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-function quad(a, b, c, d) {
-
-    var t1 = subtract(vertices[b], vertices[a]);
-    var t2 = subtract(vertices[c], vertices[b]);
-    var normal = cross(t1, t2);
-    normal = vec3(normal);
-
-     pointsArray.push(vertices[a]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
-
-     pointsArray.push(vertices[b]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
-
-     pointsArray.push(vertices[c]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
-
-     pointsArray.push(vertices[a]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
-
-     pointsArray.push(vertices[c]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
-
-     pointsArray.push(vertices[d]);
-     normalsArray.push(normal);
-    //  colorsArray.push(vertexColors[e]);
+    gl.uniform1i(gl.getUniformLocation(program, "uTexMap"), 0);
 }
 
 function tri(a, b, c) {
@@ -288,52 +247,27 @@ function tri(a, b, c) {
 
      pointsArray.push(vertices[a]);
      normalsArray.push(normal);
+     if (textcord) texCoordsArray.push(texCoord[0]);
+     else texCoordsArray.push(texCoord[0]);
     //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[b]);
      normalsArray.push(normal);
+     if (textcord) texCoordsArray.push(texCoord[1]);
+     else texCoordsArray.push(texCoord[2]);
     //  colorsArray.push(vertexColors[e]);
 
      pointsArray.push(vertices[c]);
      normalsArray.push(normal);
+     if (textcord) texCoordsArray.push(texCoord[2]);
+     else texCoordsArray.push(texCoord[1]);
     //  colorsArray.push(vertexColors[e]);
+
+    textcord = !textcord;
 }
 
 function colorCube()
 {
-    // // Sides
-    // quad( 2, 3, 1, 0);
-    // quad( 0, 1, 5, 4);
-    // quad( 4, 5, 13, 12);
-    // quad( 12, 13, 21, 20);
-    // quad( 20, 21, 23, 22);
-    // quad( 22, 23, 19, 18);
-    // quad( 18, 19, 11, 10);
-    // quad( 10, 11, 3, 2);
-
-    // // Top and Bottom
-    // quad( 17, 15, 7, 9);
-    // quad( 16, 8, 6, 14);
-
-    // // Side Up
-    // quad( 19, 17, 9, 11 );
-    // tri( 11, 9, 3 );
-    // quad( 3, 9, 7, 1 );
-    // tri( 1, 7, 5 );
-    // quad( 5, 7, 15, 13 );
-    // tri( 13, 15, 21 );
-    // quad( 21, 15, 17, 23 );
-    // tri( 23, 17, 19 );
-
-    // // Side bottom
-    // quad( 16, 18, 10, 8 );
-    // tri( 8, 10, 2 );
-    // quad( 8, 2, 0, 6 );
-    // tri( 6, 0, 4 );
-    // quad( 6, 4, 12, 14 );
-    // tri( 14, 12, 20 );
-    // quad( 14, 20, 22, 16 );
-    // tri( 16, 22, 18 );
     tri( 0, 1, 2, );
     tri( 3, 4, 5, );
     tri( 6, 7, 8, );
@@ -398,7 +332,7 @@ window.onload = function init() {
     //
     //  Load shaders and initialize attribute buffers
     //
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram(program);
 
     var nBuffer = gl.createBuffer();
@@ -420,6 +354,17 @@ window.onload = function init() {
     var vPosition = gl.getAttribLocation( program, "aPosition" );
     gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
+
+    var tBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, tBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW);
+
+    var texCoordLoc = gl.getAttribLocation(program, "aTexCoord");
+    gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(texCoordLoc);
+
+    var image = document.getElementById("texImage");
+    configureTexture(image);
 
     var OneDirAmbientProduct = mult(oneDirlightAmbient, materialAmbient);
     var OneDirDiffuseProduct = mult(oneDirlightDiffuse, materialDiffuse);
@@ -481,6 +426,7 @@ window.onload = function init() {
     document.getElementById("rotateobj").onchange = function(){rotateflag = !rotateflag;    gl.uniform1f(gl.getUniformLocation(program,"uRflag"),rotateflag);};
     
     document.getElementById("cartoontoggle").onchange = function(){cartoonflag = !cartoonflag;    gl.uniform1f(gl.getUniformLocation(program,"ucartoonflag"),cartoonflag);};
+    document.getElementById("texturetoggle").onchange = function(){textureflag = !textureflag;    gl.uniform1f(gl.getUniformLocation(program,"utextureflag"),textureflag);};
     
     // sliders for viewing parameters
     document.getElementById("zNearSlider").oninput=function(event){near = event.target.value;};

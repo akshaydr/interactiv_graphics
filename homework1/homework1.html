@@ -124,6 +124,8 @@
 
 in  vec4 aPosition;
 in  vec3 aNormal;
+in vec2 aTexCoord;
+
 uniform mat4 uModelViewMatrix;
 uniform mat4 uProjectionMatrix;
 uniform mat4 uRotationMatrix, uSpotRotationMatrix;
@@ -135,7 +137,8 @@ vec3 spotpos, pos;
 
 out vec3 spotN, spotL, spotE, spotlightpos;
 out vec3 onedirN, onedirL, onedirE, onedirlightpos;
- 
+out vec2 vTexCoord;
+
 void main()
 {
     // One Directional Light vectors
@@ -167,6 +170,8 @@ void main()
     spotL = normalize(spotlightpos - spotpos);
     spotE = normalize(-spotpos); 
 
+    vTexCoord = aTexCoord;
+
     if (uRflag) {
         gl_Position = uModelViewMatrix *aPosition; 
     }
@@ -187,7 +192,9 @@ uniform vec4 uglobalAmbientProduct;
 
 uniform float uShininess;
 uniform float lCutOff;
-uniform bool ucartoonflag;
+uniform bool ucartoonflag, utextureflag;
+
+uniform sampler2D uTextureMap;
 
 vec4 Ci, Cs;
 vec4 ambient, diffuse, specular;
@@ -195,6 +202,7 @@ vec4 spotCartoonShade, onedirCartoonShade;
 
 in vec3 spotN, spotL, spotE, spotlightpos;
 in vec3 onedirN, onedirL, onedirE, onedirlightpos;
+in vec2 vTexCoord;
 out vec4 fColor;
 
 void main()
@@ -253,11 +261,17 @@ void main()
     }
 
     // fColor = oneDirambient + oneDirposdiffuse + oneDirposspecular;
-    if(ucartoonflag){fColor = spotCartoonShade + onedirCartoonShade;}
-    else fColor = ambient + diffuse + specular;
-    
-
-    fColor.a = 1.0;
+    if(utextureflag) {
+        fColor = texture(uTextureMap, vTexCoord);
+    }
+    else if (ucartoonflag) {
+        fColor = spotCartoonShade + onedirCartoonShade;
+        fColor.a = 1.0;
+    }
+    else {
+        fColor = ambient + diffuse + specular;
+        fColor.a = 1.0;
+    }
 
 }
 </script>
@@ -270,7 +284,7 @@ void main()
 <canvas id="gl-canvas" width="512" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
-
+<img id = "texImage" src = "image.jpg" hidden></img>
 <br/>
 
 <p> </p>
@@ -290,7 +304,7 @@ Oops ... your browser doesn't support the HTML5 canvas element
 <br/>
 </div>
 
-<div style = "position:relative; left:1200px; top:-675px;">
+<div style = "position:relative; left:1300px; top:-675px;">
 <p> Viewer Position </p>
 <div>Theta <br/> -180    <input id="thetaSlider"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
 <div>Phi <br/>   -180    <input id="phiSlider"    type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
@@ -306,7 +320,7 @@ Oops ... your browser doesn't support the HTML5 canvas element
     <br/>
 </div>
 
-<div style = "position:relative; left:1200px; top:-875px;">
+<div style = "position:relative; left:1300px; top:-883px;">
     <p> Spotlight Position </p>
     <div>Rotation X <br/> -180    <input id="spotlightx"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
     <div>Rotation Y <br/> -180    <input id="spotlighty"  type="range" min="-180.0" max="180.0" step="0.1" value="4"   class="slider" />180  </div>
@@ -317,6 +331,12 @@ Oops ... your browser doesn't support the HTML5 canvas element
 <div style = "position:relative; left:600px; top:-850px;">
     <p> Cartoon Shading Toggle Button </p>
     <label class="switch" id= "cartoontoggle"><input type="checkbox"><span class="slider2 round"></span></label>
+    <br/>
+</div>
+
+<div style = "position:relative; left:900px; top:-935px;">
+    <p> Texture Toggle Button </p>
+    <label class="switch" id= "texturetoggle"><input type="checkbox"><span class="slider2 round"></span></label>
     <br/>
 </div>
 
