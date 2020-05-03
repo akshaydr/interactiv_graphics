@@ -1,5 +1,10 @@
 "use strict";
 
+// Easy commands access. Please ignore
+// cd G:\Artificial Intelligence and Robotics\Semester 2\Interactive Graphics\Homework\interactiv_graphics
+// python -m http.server
+// http://localhost:8000/homework1/homework1.html
+
 var canvas;
 var gl;
 
@@ -64,21 +69,16 @@ var oneDirlightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
 var oneDirlightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
 var oneDirlightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 
-// var oneDirLightPosition = vec4(0.0, 0.0, 0.0, 0.0 );
-// var oneDirlightAmbient = vec4(0.0, 0.0, 0.0, 0.0 );
-// var oneDirlightDiffuse = vec4( 0.0, 0.0, 0.0, 0.0 );
-// var oneDirlightSpecular = vec4( 0.0, 0.0, 0.0, 0.0 );
-
 var spotLightPosition = vec4(0.0, 0.0, 1.0, 0.0 );
-var spotLightAmbient =  vec4(1.0, 1.0, 1.0, 1.0 );
-var spotLightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
+var spotLightAmbient =  vec4(0.2, 0.2, 0.2, 1.0);
+var spotLightDiffuse = vec4(  1.0, 1.0, 1.0, 1.0 );
 var spotLightSpecular = vec4( 1.0, 1.0, 1.0, 1.0 );
 var lCutOff=0.867;
 
 var materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
-var materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
-var materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
-var materialShininess = 150.0;
+var materialDiffuse = vec4(0.6, 1.0, 0.6, 1.0);
+var materialSpecular = vec4(0.6, 1.0, 0.6, 1.0);
+var materialShininess = 100.0;
 
 var texture;
 
@@ -411,20 +411,23 @@ window.onload = function init() {
     
     gl.uniform1f(gl.getUniformLocation(program, "uShininess"), materialShininess);
 
-    //event listeners for buttons
+    //One direction Light rotation
     document.getElementById("lightx").oninput=function(event){lightanglex = event.target.value;};
     document.getElementById("lighty").oninput=function(event){lightangley = event.target.value;};
     document.getElementById("lightz").oninput=function(event){lightanglez = event.target.value;};
 
+    //Spotlight rotation
     document.getElementById("spotlightx").oninput=function(event){spotlightanglex = event.target.value;};
     document.getElementById("spotlighty").oninput=function(event){spotlightangley = event.target.value;};
     document.getElementById("limit").oninput=function(event){gl.uniform1f(gl.getUniformLocation(program,"lCutOff"), Math.cos(event.target.value* Math.PI/180.0));};
 
+    //Object Rotation
     document.getElementById("xObjButton").onclick = function(){axis = xAxis;};
     document.getElementById("yObjButton").onclick = function(){axis = yAxis;};
     document.getElementById("zObjButton").onclick = function(){axis = zAxis;};
     document.getElementById("rotateobj").onchange = function(){rotateflag = !rotateflag;    gl.uniform1f(gl.getUniformLocation(program,"uRflag"),rotateflag);};
     
+    // Flags for enabling and disabling cartoon shading and Texture 
     document.getElementById("cartoontoggle").onchange = function(){cartoonflag = !cartoonflag;    gl.uniform1f(gl.getUniformLocation(program,"ucartoonflag"),cartoonflag);};
     document.getElementById("texturetoggle").onchange = function(){textureflag = !textureflag;    gl.uniform1f(gl.getUniformLocation(program,"utextureflag"),textureflag);};
     
@@ -442,7 +445,7 @@ var render = function() {
 
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    // if(flag) lighttheta[axis] += 2.0;
+    // One Direction Light Rotation 
     lighttheta[xAxis] = lightanglex;
     lighttheta[yAxis] = lightangley;
     lighttheta[zAxis] = lightanglez;
@@ -451,14 +454,13 @@ var render = function() {
     rotationMatrix = mult(rotationMatrix, rotate(lighttheta[yAxis], vec3(0, 1, 0)));
     rotationMatrix = mult(rotationMatrix, rotate(lighttheta[zAxis], vec3(0, 0, 1)));
 
+    // Spotilight Rotation 
     spotlighttheta[xAxis] = spotlightanglex;
     spotlighttheta[yAxis] = spotlightangley;
     spotrotationMatrix = mat4();
     spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[xAxis], vec3(1, 0, 0)));
     spotrotationMatrix = mult(spotrotationMatrix, rotate(spotlighttheta[yAxis], vec3(0, 1, 0)));
-
-    // var spotlightmatrix 
-    
+ 
     if(rotateflag) { 
         objtheta[axis] += 2.0;
         modelViewMatrix = mat4();

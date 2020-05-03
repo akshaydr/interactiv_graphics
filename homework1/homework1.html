@@ -260,9 +260,8 @@ void main()
 
     }
 
-    // fColor = oneDirambient + oneDirposdiffuse + oneDirposspecular;
     if(utextureflag) {
-        fColor = texture(uTextureMap, vTexCoord);
+        fColor = texture(uTextureMap, vTexCoord) + ambient + diffuse + specular;
     }
     else if (ucartoonflag) {
         fColor = spotCartoonShade + onedirCartoonShade;
@@ -292,10 +291,12 @@ Oops ... your browser doesn't support the HTML5 canvas element
 <div style = "position:relative; left:600px; top:-512px;">
     <p> Rotation Toggle Button </p>
     <label class="switch" id= "rotateobj"><input type="checkbox"><span class="slider2 round"></span></label>
-    <br/>
+<br/>
+<br/>
     <button id= "xObjButton" class="button btnred">Rotate X</button>
     <button id= "yObjButton" class="button btnred">Rotate Y</button>
     <button id= "zObjButton" class="button btnred">Rotate Z</button>
+    <br/>
     <br/>
 
 <p> Perspective Position </p>
